@@ -1,0 +1,135 @@
+```{r}
+library(ggplot2)
+library(cowplot)
+library(reshape2)
+
+# Read the data
+setwd("../..")
+toy_model <- read.csv("data/ice_cream_sales.csv")
+```
+
+```{r}
+setwd("../../plots")
+
+p <- ggplot(toy_model, aes(x=Temperature))+
+  geom_histogram(binwidth=1, fill="blue", color="black")+
+  labs(title="Histogram of Temperature", x="Values", y="Frequency")
+
+print(p)
+
+ggsave("temp_histogram.pdf", plot=p, width=8, height=6)
+```
+
+```{r}
+setwd("../../plots")
+
+boxplot_a <- ggplot(toy_model, aes(x=Is_Weekend, y=Hours_Open, fill=Is_Weekend))+
+  geom_boxplot() +
+  labs(title="Boxplot of Business Hours", x="Weekend", y="Business Hours")
+
+boxplot_b <- ggplot(toy_model, aes(x=Is_Weekend, y=Ice_Cream_Sales, fill=Is_Weekend))+
+  geom_boxplot() +
+  labs(title="Boxplot of Ice Cream Sales", x="Weekend", y="Ice Cream Sales")
+
+combined_plot <- plot_grid(boxplot_a, boxplot_b, labels = c("A", "B"), ncol = 1)
+
+print(combined_plot)
+
+ggsave("weekend_boxplots.pdf", plot = combined_plot, width = 8, height = 12)
+```
+
+```{r}
+setwd("../../plots")
+
+scatterplot_a <- ggplot(toy_model, aes(x=Temperature, y=Electricity_Usage))+
+  geom_point(color = "blue") +
+  geom_smooth(method = "lm", color = "red") +
+  labs(title = "Scatterplot of Electricity Usage vs Temperature with Trendline", 
+       x = "Temperature (C°)", y = "Electricity Usage") +
+  theme(plot.title = element_text(size = 14), axis.title = element_text(size = 12))
+
+scatterplot_b <- ggplot(toy_model, aes(x = Temperature, y = Ice_Cream_Sales)) +
+  geom_point(color = "green") +
+  geom_smooth(method = "lm", color = "red") +
+  labs(title = "Scatterplot of Ice Cream Sales vs Temperature with Trendline", 
+       x = "Temperature (C°)", y = "Ice Cream Sales") +
+  theme(plot.title = element_text(size = 14), axis.title = element_text(size = 12))
+
+combined_scatterplot <- plot_grid(scatterplot_a, scatterplot_b, labels = c("A", "B"), ncol = 1)
+
+print(combined_scatterplot)
+
+ggsave("temperature_scatters.pdf", plot = combined_scatterplot, width = 8, height = 12)
+```
+
+```{r}
+setwd("../../plots")
+toy_model_cor <- toy_model
+toy_model_cor$Is_Weekend <- ifelse(toy_model_cor$Is_Weekend == "true", 1, 0)
+toy_model_cor$ID <- NULL 
+
+rename_map <- c("Temperature" = "Temperature",
+                "Is_Weekend" = "Is Weekend",
+                "Hours_Open" = "Hours Open",
+                "Electricity_Usage" = "Electricity Usage",
+                "Ice_Cream_Sales" = "Ice Cream Sales")
+
+cor_matrix <- cor(toy_model_cor)
+melted_cor_matrix <- melt(cor_matrix)
+
+melted_cor_matrix$Var1 <- rename_map[melted_cor_matrix$Var1]
+melted_cor_matrix$Var2 <- rename_map[melted_cor_matrix$Var2]
+
+correlation_matrix <- ggplot(data = melted_cor_matrix, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white",
+                       midpoint = 0, limit = c(-1, 1), space = "Lab",
+                       name = "Correlation") +
+  labs(title = "Correlation Matrix for the Toy Dataset", x=NULL, y=NULL)+
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1,
+                                   size = 12, hjust = 1)) +
+  coord_fixed()
+
+ggsave("toy_correlation_matrix.pdf", plot = correlation_matrix, width = 6, height = 8)
+```
+
+```{r}
+setwd("../../plots")
+
+scatterplot_a <- ggplot(toy_model, aes(x=Hours_Open, y=Electricity_Usage))+
+  geom_point(color = "blue") +
+  geom_smooth(method = "lm", color = "red") +
+  labs(title = "Scatterplot of Electricity Usage vs Business Hours with Trendline", 
+       x = "Business Hours", y = "Electricity Usage") +
+  theme(plot.title = element_text(size = 14), axis.title = element_text(size = 12))
+
+scatterplot_b <- ggplot(toy_model, aes(x=Hours_Open, y=Ice_Cream_Sales)) +
+  geom_point(color = "green") +
+  geom_smooth(method = "lm", color = "red") +
+  labs(title = "Scatterplot of Ice Cream Sales vs Business Hours with Trendline", 
+       x = "Business Hours", y = "Ice Cream Sales") +
+  theme(plot.title = element_text(size = 14), axis.title = element_text(size = 12))
+
+combined_scatterplot <- plot_grid(scatterplot_a, scatterplot_b, labels = c("A", "B"), ncol = 1)
+
+print(combined_scatterplot)
+
+ggsave("business_hours_scatters.pdf", plot = combined_scatterplot, width = 8, height = 12)
+```
+
+```{r}
+setwd("../../plots")
+
+toy_model$high_electricity_usage <- ifelse(toy_model$Electricity_Usage > median(toy_model$Electricity_Usage, na.rm = TRUE), 1, 0)
+
+boxplot_heu <- ggplot(toy_model, aes(x=factor(high_electricity_usage), y=Ice_Cream_Sales, fill=factor(high_electricity_usage))) +
+  geom_boxplot() +
+  labs(title="Boxplot of Ice Cream Sales Based on High Electricity Usage", x="High Electricity Usage", y="Ice Cream Sales")+
+  theme_minimal()+
+  theme(legend.position="none")
+
+print(boxplot_heu)
+
+ggsave("heu_vs_ics.pdf", plot=boxplot_heu, width=8, height = 6)
+```

@@ -1,0 +1,54 @@
+```{r}
+library(ggplot2)
+library(readr)
+library(gridExtra)
+library(cowplot)
+# Read the data
+setwd("../..")
+toy_model <- read.csv("data/ice_cream_sales.csv")
+```
+
+```{r}
+# Plot the data
+p_correlation <- ggplot(toy_model, aes(x=Electricity_Usage, y=Ice_Cream_Sales)) +
+    geom_point(color="steelblue", alpha=0.8) +
+    labs(title="Ice Cream Sales vs Electricity Usage", 
+         x="Electricity Usage (kWh)", 
+         y="Ice Cream Sales") +
+    theme_minimal() +
+    theme(
+        plot.title = element_text(hjust = 0.5, face="bold", size=16),
+        axis.title = element_text(size=14)
+    )
+
+p_correlation
+```
+
+```{r}
+# Plot the data
+p_causation <- ggplot(toy_model, aes(x=Electricity_Usage, y=Ice_Cream_Sales)) +
+    geom_point(aes(color=Temperature), alpha=0.6) +
+    scale_color_gradient(low="blue", high="red") +
+    labs(title="Ice Cream Sales vs Electricity Usage (Temperature as color)", 
+         x="Electricity Usage (kWh)", 
+         y="Ice Cream Sales") +
+    theme_minimal() +
+    theme(
+        plot.title = element_text(hjust = 0.5, face="bold", size=16),
+        axis.title = element_text(size=14),
+        legend.position = "right",
+        legend.title = element_text(face = "bold", size=14),
+        legend.text = element_text(size=12)
+    )
+
+p_causation
+```
+
+```{r}
+setwd("../..")
+pdf("plots/corvcaus.pdf", width = 20, height = 12)
+plot_grid(p_correlation, p_causation, labels = c("A", "B"), label_size = 14, ncol = 2)
+dev.off()
+```
+
+

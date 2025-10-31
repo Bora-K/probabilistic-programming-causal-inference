@@ -1,0 +1,32 @@
+```{r}
+library(ggplot2)
+library(readr)
+library(gridExtra)
+library(cowplot)
+# Read the data
+
+toy_model <- read.csv("data/ice_cream_sales.csv")
+```
+
+```{r}
+# Plot the data
+setwd("../..")
+
+p_association <- ggplot(toy_model, aes(x=Electricity_Usage, y=Ice_Cream_Sales)) +
+    geom_point(color="steelblue", alpha=0.8) +
+    geom_smooth(method = "lm", se = TRUE, color = "red", linetype = "dashed") +
+    labs(title="Ice Cream Sales vs Electricity Usage", 
+         x="Electricity Usage (kWh)", 
+         y="Ice Cream Sales") +
+    theme_minimal() +
+    theme(
+        plot.title = element_text(hjust = 0.5, face="bold", size=16),
+        axis.title = element_text(size=14)
+    )
+    
+
+pdf("plots/ic_association_scatter.pdf", width = 20, height = 12)
+print(p_association)
+dev.off()
+```
+

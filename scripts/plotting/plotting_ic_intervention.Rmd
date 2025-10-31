@@ -1,0 +1,52 @@
+```{r}
+library(ggplot2)
+library(readr)
+library(gridExtra)
+library(cowplot)
+# Read the data
+toy_model <- read.csv("data/ice_cream_association.csv")
+interventions <- read.csv("data/ice_cream_intervention_plotting.csv")
+```
+
+```{r}
+# Plot the data
+p_intervention <- ggplot(toy_model, aes(x=Electricity_Usage, y=Ice_Cream_Sales)) +
+    geom_point(color="steelblue", alpha=0.8) +
+    geom_point(data=interventions,color="red", alpha=0.8) +
+    labs(title="Ice Cream Sales vs Electricity Usage", 
+         x="Electricity Usage (kWh)", 
+         y="Ice Cream Sales") +
+    theme_minimal() +
+    theme(
+        plot.title = element_text(hjust = 0.5, face="bold", size=16),
+        axis.title = element_text(size=14)
+    )
+
+pdf("plots/intervention2.pdf", width = 20, height = 10)
+print(p_intervention)
+dev.off()
+```
+
+
+```{r}
+# This is for counterfactual
+
+toy_model <- read.csv("data/ice_cream_assoc_counterfactual_deleted.csv")
+interventions <- read.csv("data/hot_days.csv")
+
+p_cf <- ggplot(toy_model, aes(x=Electricity_Usage, y=Ice_Cream_Sales)) +
+    geom_point(color="steelblue", alpha=0.8) +
+    geom_point(data=interventions,color="red", alpha=0.8) +
+    labs(title="Ice Cream Sales vs Electricity Usage", 
+         x="Electricity Usage (kWh)", 
+         y="Ice Cream Sales") +
+    theme_minimal() +
+    theme(
+        plot.title = element_text(hjust = 0.5, face="bold", size=16),
+        axis.title = element_text(size=14)
+    )
+
+pdf("plots/cf_scatter.pdf", width = 20, height = 10)
+print(p_cf)
+dev.off()
+```
